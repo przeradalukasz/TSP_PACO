@@ -27,8 +27,9 @@ namespace TSP_PACO
 
             AdjacencyMatrix = Utils.LoadDistanceData(Towns);
 
-            PACO paco = new PACO(AdjacencyMatrix,Towns,Alpha,Beta,Q0,Rho,Ksi,rnd,NumberOfAnts);
-
+            PACO paco = new PACO(AdjacencyMatrix,Towns,Alpha,Beta,Q0,Rho,Ksi,rnd,NumberOfAnts,10);
+            paco.Start();
+            List<Town> best = paco.GlobalBestPath;
             double lol = paco.NearestNeighbour();
 
             //while (population.Generations < 50)

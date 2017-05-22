@@ -115,17 +115,21 @@ namespace TSP_PACO
             }
         }
 
-        public double CalculateTauEtha(Town currentTown, out List<double> tauEtha)
+        public double CalculateTauEtha(Town currentTown, out List<double> tauEtha, List<Town> citiesLeft)
         {
             tauEtha = new List<double>();
             double total = 0;
-            for (int i = 0; i < Towns.Length; i++)
+            for (int i = 0; i < citiesLeft.Count; i++)
             {
                 double tauEthaVal;
                 try
                 {
                     tauEthaVal = Math.Pow(PheromoneMatrix[currentTown.Id, i], _alpha) *
-                                 Math.Pow(1.0 / AdjacencyMatrix[currentTown.Id, Towns[i].Id], _beta);
+                                 Math.Pow(1.0 / AdjacencyMatrix[currentTown.Id, citiesLeft[i].Id], _beta);
+                    if (double.IsPositiveInfinity(tauEthaVal))
+                    {
+                        tauEthaVal = 0;
+                    }
                 }
                 catch (DivideByZeroException e)
                 {
@@ -138,25 +142,25 @@ namespace TSP_PACO
             return total;
         }
 
-        public Town FindNextCity(Town currentTown)
+        public Town FindNextCity(Town currentTown, List<Town> citiesLeft)
         {
             List<double> tauEtha;
 
-            double totalTauEtha = CalculateTauEtha(currentTown, out tauEtha);
+            double totalTauEtha = CalculateTauEtha(currentTown, out tauEtha, citiesLeft);
 
             if (_rnd.NextDouble() < _q0)
             {
                 double argmax = tauEtha.Max();
-                return Towns[tauEtha.IndexOf(argmax)];
+                return citiesLeft[tauEtha.IndexOf(argmax)];
             }
             else
             {
                 double roulette = 0;
-                for (int i = 0; i < Towns.Length; i++)
+                for (int i = 0; i < citiesLeft.Count; i++)
                 {
                     roulette = roulette + tauEtha[i];
                     if (_rnd.Next((int)totalTauEtha) < roulette)
-                        return Towns[i];
+                        return citiesLeft[i];
                 }
             }
             return null;
@@ -170,7 +174,7 @@ namespace TSP_PACO
 
             for (int i = 0; i < numberOfCities - 2; i++)
             {
-                Town nextTown = FindNextCity(curretnTown);
+                Town nextTown = FindNextCity(curretnTown, towns);
                 ant.Tour.Add(nextTown);
                 curretnTown = nextTown;
                 towns.Remove(nextTown);
@@ -229,7 +233,7 @@ namespace TSP_PACO
                             {
                                 newAntTour[antTour.Count - 1] = newAntTour[k];
                             }
-                            if (l == 0)
+                            if (l == antTour.Count-1)
                             {
                                 newAntTour[0] = newAntTour[l];
                             }
@@ -256,8 +260,10 @@ namespace TSP_PACO
 
         public void InitializeTours(List<Town> bestTour)
         {
+            bestTour = new List<Town>();
             for (int i = 0; i < _numberOfAnts; i++)
             {
+                Ants[i].Tour = new List<Town>();
                 Ants[i].TourLength = 0;
                 Ants[i].Tour.Add(Towns[_rnd.Next(numberOfCities)]);
             }
