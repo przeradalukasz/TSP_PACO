@@ -12,7 +12,19 @@ namespace TSP_PACO
         public int Id { get; set; }
         public List<Town> Tour { get; set; }
         public double TourLength { get; set; }
+        public double UnbalancingDegree { get; set; }
 
+        public Ant(Ant ant)
+        {
+            Id = ant.Id;
+            Tour = new List<Town>(ant.Tour);
+            TourLength = ant.TourLength;
+            UnbalancingDegree = ant.UnbalancingDegree;
+        }
+        public Ant()
+        {
+            Tour = new List<Town>();
+        }
         public Ant(int id)
         {
             Id = id;

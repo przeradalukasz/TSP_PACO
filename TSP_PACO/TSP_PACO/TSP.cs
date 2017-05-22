@@ -19,7 +19,8 @@ namespace TSP_PACO
         public static readonly double Q0 = 0.9; 
         public static readonly double Rho = 0.1; 
         public static readonly double Ksi = 0.1; 
-        public static readonly int NumberOfAnts = 10;
+        public static readonly int NumberOfAnts = 500;
+        public static readonly int Iterations = 200;
 
         static void Main()
         {
@@ -27,11 +28,10 @@ namespace TSP_PACO
 
             AdjacencyMatrix = Utils.LoadDistanceData(Towns);
 
-            PACO paco = new PACO(AdjacencyMatrix,Towns,Alpha,Beta,Q0,Rho,Ksi,rnd,NumberOfAnts,10);
+            PACO paco = new PACO(AdjacencyMatrix,Towns,Alpha,Beta,Q0,Rho,Ksi,rnd,NumberOfAnts, Iterations);
             paco.Start();
-            List<Town> best = paco.GlobalBestPath;
-            double lol = paco.NearestNeighbour();
-
+            Ant ant = paco.GlobalBestDistance;
+            Ant ant2 = paco.GlobalBestUnbalancing;
             //while (population.Generations < 50)
             //{
             //    population.NaturalSelection();
