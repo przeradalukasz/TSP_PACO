@@ -14,13 +14,22 @@ namespace TSP_PACO
 
         private static readonly Random rnd = new Random(DateTime.Now.Millisecond);
 
+        public static readonly double Alpha = 1; 
+        public static readonly double Beta = 3; 
+        public static readonly double Q0 = 0.9; 
+        public static readonly double Rho = 0.1; 
+        public static readonly double Ksi = 0.1; 
+        public static readonly int NumberOfAnts = 10;
+
         static void Main()
         {
             Towns = Utils.LoadTownsData(@"C:\dj.csv");
 
             AdjacencyMatrix = Utils.LoadDistanceData(Towns);
 
-            //Population population = new Population(AdjacencyMatrix, Towns, 0.05, 0.95, 10, 500, rnd);
+            PACO paco = new PACO(AdjacencyMatrix,Towns,Alpha,Beta,Q0,Rho,Ksi,rnd,NumberOfAnts);
+
+            double lol = paco.NearestNeighbour();
 
             //while (population.Generations < 50)
             //{

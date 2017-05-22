@@ -10,12 +10,13 @@ namespace TSP_PACO
     public class Ant
     {
         public int Id { get; set; }
-        public Town[] Tour { get; set; }
+        public List<Town> Tour { get; set; }
         public double TourLength { get; set; }
 
         public Ant(int id)
         {
             Id = id;
+            Tour = new List<Town>();
         }
     }
 }
