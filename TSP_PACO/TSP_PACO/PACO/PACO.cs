@@ -28,6 +28,7 @@ namespace TSP_PACO
         public Ant GlobalSecondBestDistance;
         public Ant GlobalSecondBestUnbalancing;
         public List<List<Ant>> Fronts;
+        public List<Ant> CollectionOfFirstFronts;
 
 
         public Ant[] Ants;
@@ -53,6 +54,7 @@ namespace TSP_PACO
             GlobalSecondBestDistance = new Ant();
             GlobalSecondBestUnbalancing = new Ant();
             Fronts = new List<List<Ant>>();
+            CollectionOfFirstFronts = new List<Ant>();
         }
 
         public double CalcDistance(List<Town> tour)
@@ -221,7 +223,7 @@ namespace TSP_PACO
             List<double> tauEtha;
 
             double totalTauEtha = CalculateTauEtha(currentTown, out tauEtha, citiesLeft, currentTour);
-
+           
             if (_rnd.NextDouble() < _q0)
             {
                 double argmax = tauEtha.Max();
@@ -233,7 +235,7 @@ namespace TSP_PACO
                 for (int i = 0; i < citiesLeft.Count; i++)
                 {
                     roulette = roulette + tauEtha[i];
-                    if (_rnd.Next((int)totalTauEtha) < roulette)
+                    if (_rnd.Next((int)totalTauEtha) <= roulette)
                         return citiesLeft[i];
                 }
             }
@@ -282,7 +284,7 @@ namespace TSP_PACO
                 int current = globalBestDistance.Tour[i].Id;
                 int next = globalBestDistance.Tour[i + 1].Id;
 
-                DistancePheromoneMatrix[current, next] = ((1 - _rho) * DistancePheromoneMatrix[current, next]) + (_rho * Q);
+                DistancePheromoneMatrix[current, next] = ((1 - _rho) * DistancePheromoneMatrix[current, next]) + (_rho * (Q/globalBestDistance.TourLength));
                 DistancePheromoneMatrix[next, current] = DistancePheromoneMatrix[current, next];
             }
 
@@ -291,7 +293,7 @@ namespace TSP_PACO
                 int current = globalBestUnbalancing.Tour[i].Id;
                 int next = globalBestUnbalancing.Tour[i + 1].Id;
 
-                UnbalancingDegreePheromoneMatrix[current, next] = ((1 - _rho) * UnbalancingDegreePheromoneMatrix[current, next]) + (_rho * Q);
+                UnbalancingDegreePheromoneMatrix[current, next] = ((1 - _rho) * UnbalancingDegreePheromoneMatrix[current, next]) + (_rho * (Q / globalBestDistance.UnbalancingDegree));
                 UnbalancingDegreePheromoneMatrix[next, current] = UnbalancingDegreePheromoneMatrix[current, next];
             }
 
@@ -300,7 +302,7 @@ namespace TSP_PACO
                 int current = globalSecondBestDistance.Tour[i].Id;
                 int next = globalSecondBestDistance.Tour[i + 1].Id;
 
-                DistancePheromoneMatrix[current, next] = ((1 - _rho) * DistancePheromoneMatrix[current, next]) + (_rho * Q/2);
+                DistancePheromoneMatrix[current, next] = ((1 - _rho) * DistancePheromoneMatrix[current, next]) + (_rho * 0.5 * (Q / globalBestDistance.TourLength));
                 DistancePheromoneMatrix[next, current] = DistancePheromoneMatrix[current, next];
             }
 
@@ -309,7 +311,7 @@ namespace TSP_PACO
                 int current = globalSecondBestUnbalancing.Tour[i].Id;
                 int next = globalSecondBestUnbalancing.Tour[i + 1].Id;
 
-                UnbalancingDegreePheromoneMatrix[current, next] = ((1 - _rho) * UnbalancingDegreePheromoneMatrix[current, next]) + (_rho * Q/2);
+                UnbalancingDegreePheromoneMatrix[current, next] = ((1 - _rho) * UnbalancingDegreePheromoneMatrix[current, next]) + (_rho * 0.5 *(Q / globalBestDistance.UnbalancingDegree));
                 UnbalancingDegreePheromoneMatrix[next, current] = UnbalancingDegreePheromoneMatrix[current, next];
             }
         }
@@ -437,6 +439,7 @@ namespace TSP_PACO
             
             for (int i = 0; i < _iterations; i++)
             {
+                Console.WriteLine("Iteration: " + i);
                 InitializeTours();
                 
                 for (int j = 0; j < _numberOfAnts; j++)
@@ -447,6 +450,9 @@ namespace TSP_PACO
                     // localSearchResult = LocalSearch(Ants[j].Id, Ants[j].Tour, Ants[j].TourLength);
                     //[j].Tour = localSearchResult.Item1;
                     //[j].TourLength = localSearchResult.Item2;
+
+
+
 
                     if (Math.Abs(GlobalSecondBestDistance.TourLength) < 0.0000000001 || GlobalSecondBestDistance.TourLength > Ants[j].TourLength)
                     {
@@ -475,6 +481,9 @@ namespace TSP_PACO
 
                     }
                 }
+                GetFronts(Ants);
+                CollectionOfFirstFronts.AddRange(Fronts[0]);
+
                 GlobalPheromoneUpdate(GlobalBestDistance, GlobalBestUnbalancing, GlobalSecondBestDistance, GlobalSecondBestUnbalancing);
             }
         }
@@ -490,6 +499,7 @@ namespace TSP_PACO
                 Ants[i] = new Ant(i);
             }
             SystemStart(distanceTau0, unbalancingTau0);
+            
         }
 
 

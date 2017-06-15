@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TSP_PACO;
+using Newtonsoft.Json;
 
 namespace TSP_PACO
 {
@@ -98,6 +99,74 @@ namespace TSP_PACO
                 while (r.ReadLine() != null) { i++; }
                 return i;
             }
+        }
+
+        public static List<Town> LoadTownsDataFromJson(string path)
+        {
+            List<Town> towns;
+            using (StreamReader r = new StreamReader(path))
+            {
+                string json = r.ReadToEnd();
+                towns = JsonConvert.DeserializeObject<List<Town>>(json);
+            }
+            return towns;
+        }
+
+        public static void SaveResultsToCsv2(string path, Ant[] ants)
+        {
+            var csv = new StringBuilder();
+
+            foreach (var pathEl in ants)
+            {
+
+                var first = Math.Round(pathEl.TourLength, 0);
+                var second = Math.Round(pathEl.UnbalancingDegree, 0);
+
+                var newLine = string.Format("{0};{1}", first, second);
+                csv.AppendLine(newLine);
+            }
+            File.WriteAllText(path, csv.ToString());
+        }
+
+        public static double[,] LoadCrispDistanceDataFromJson(string path)
+        {
+            double[,] adjMatrix;
+            using (StreamReader r = new StreamReader(path))
+            {
+                string json = r.ReadToEnd();
+                adjMatrix = JsonConvert.DeserializeObject<double[,]>(json);
+            }
+            return adjMatrix;
+        }
+
+        internal static double[,] CutUnnecesssaryElements(double[,] adjacencyMatrix, List<Town> towns)
+        {
+            var newAdjacencyMatrix = new double[towns.Count + 1, towns.Count + 1];
+            int i = 1;
+            foreach (var town1 in towns)
+            {
+                int j = 1;
+                foreach (var town2 in towns)
+                {
+
+                    newAdjacencyMatrix[i, j] = adjacencyMatrix[town1.Id, town2.Id];
+                    j++;
+                }
+                i++;
+            }
+
+
+
+            return newAdjacencyMatrix;
+        }
+
+        public static List<Town> OrderTowns(List<Town> towns)
+        {
+            for (int i = 0; i < towns.Count; i++)
+            {
+                towns[i].Id = i + 1;
+            }
+            return towns;
         }
     }
 }
